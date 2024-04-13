@@ -1,8 +1,23 @@
+from flask import Flask, request
 import telebot
-from telebot import types
 from telegram.constants import ParseMode
+from telebot import types
+import time
 
-bot = telebot.TeleBot("6757794432:AAGia_ydDYQ1qHzQwzq7AYsRkVJJL82mYKg")
+secret = 'd484237c-d2d5-408c-813b-cd3abedebadf'
+bot = telebot.TeleBot("6757794432:AAGia_ydDYQ1qHzQwzq7AYsRkVJJL82mYKg", threaded=False)
+
+bot.remove_webhook()
+time.sleep(1)
+bot.set_webhook(url="https://CeYn97.pythonanywhere.com/{}".format(secret))
+
+app = Flask(__name__)
+
+@app.route('/{}'.format(secret), methods=["POST"])
+def webhook():
+    bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
+    print("Message")
+    return "ok", 200
 
 # @bot.message_handler(commands=['start'])
 # def start(message):
