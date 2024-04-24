@@ -91,9 +91,6 @@ def ask_question(message):
 @bot.message_handler(func=lambda message: message.text == "Написать менеджеру")
 def ask_question(message):
     pass
-    # bot.send_message(message.chat.id, "ю")
-
-
 @bot.message_handler(func=lambda message: message.text == "Как поступить?")
 def queshion1(message):
     subtopic_markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
