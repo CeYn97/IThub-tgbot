@@ -1,11 +1,12 @@
-from flask import Flask, request
+import pygsheets
+from flask import Flask, request, jsonify, make_response
 import telebot
 from telegram.constants import ParseMode
 from telebot import types
 import time
 
 secret = 'd484237c-d2d5-408c-813b-cd3abedebadf'
-bot = telebot.TeleBot("7157996765:AAF6adCWiAD7CNxtcqJ8AxQZLsE4_hDNY3Y", threaded=False)
+bot = telebot.TeleBot("7159812440:AAGGfeAieoSEwJOReMQCpyDf3Mc1QGkgOM4", threaded=False)
 
 bot.remove_webhook()
 time.sleep(1)
@@ -13,11 +14,27 @@ bot.set_webhook(url="https://CeYn97.pythonanywhere.com/{}".format(secret))
 
 app = Flask(__name__)
 
+def save_google_sheets(name, phone, classes):
+    gc = pygsheets.authorize(client_secret="./Credentials.json")
+    sheet = gc.open('ithub-orders')
+    working_list = sheet.sheet1
+    working_list.title = "TEST!!!!"
+    working_list.update_values('A1:A3', [[name],[phone],[classes]])
+
+
 @app.route('/{}'.format(secret), methods=["POST"])
 def webhook():
     bot.process_new_updates([telebot.types.Update.de_json(request.stream.read().decode("utf-8"))])
     print("Message")
     return "ok", 200
+
+@app.route('/order', methods=['POST'])
+def handle_order():
+    name = request.form['name']
+    phone = request.form['phone']
+    classes = request.form['classes']
+    save_google_sheets(name, phone, classes)
+    return make_response(jsonify(name, phone, classes), 201)
 
 @bot.message_handler(commands=['start'])
 def send_menu(message):
@@ -86,7 +103,7 @@ def ask_question(message):
 
 @bot.message_handler(func=lambda message: message.text == "Контакты колледжа")
 def ask_question(message):
-    bot.send_message(message.chat.id, "Если у вас остались вопросы, на которые мы не смогли ответить здесь, то вы можете обратиться к сотрудникам приемной комиссии:\n \nЭл. почта: info@spb.ithub.ru\n \nТелефон: <a href='tel:+78122105951'>+7 (812) 210--67</a> \n \nОфис: Аптекарский пр-т, д. 2, лит, 3, пом. 10Н, 6 минут пешком от м. Петроградская, режим работы пн-пт 10:00-19:00\n \nhttps://t.me/ithubspbsupport - Наш менеджер", parse_mode=ParseMode.HTML)
+    bot.send_message(message.chat.id, "Если у вас остались вопросы, на которые мы не смогли ответить здесь, то вы можете обратиться к сотрудникам приемной комиссии:\n \nЭл. почта: info@spb.ithub.ru\n \nТелефон: <a href='tel:+78122105951'>+7 (812) 210-59-51</a> \n \nОфис: Аптекарский пр-т, д. 2, лит, 3, пом. 10Н, 6 минут пешком от м. Петроградская, режим работы пн-пт 10:00-19:00\n \nhttps://t.me/ithubspbsupport - Наш менеджер", parse_mode=ParseMode.HTML)
 
 @bot.message_handler(func=lambda message: message.text == "Написать менеджеру")
 def ask_question(message):
