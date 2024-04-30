@@ -4,6 +4,7 @@ import telebot
 from telegram.constants import ParseMode
 from telebot import types
 import time
+import datetime
 
 secret = "d484237c-d2d5-408c-813b-cd3abedebadf"
 bot = telebot.TeleBot("7159812440:AAGGfeAieoSEwJOReMQCpyDf3Mc1QGkgOM4", threaded=False)
@@ -19,8 +20,10 @@ def save_google_sheets(name, phone, classes):
     gc = pygsheets.authorize(service_file="./Credentials.json")
     sheet = gc.open("ithub-orders")
     working_list = sheet.sheet1
-    working_list.title = "TEST!!!!"
-    working_list.update_values("A1:A3", [[name], [phone], [classes]])
+
+    current_datetime = datetime.datetime.today().strftime("%d.%m.%Y %H:%M")
+
+    working_list.insert_rows(1, values=[name, phone, classes, current_datetime])
 
 
 @app.route("/{}".format(secret), methods=["POST"])
